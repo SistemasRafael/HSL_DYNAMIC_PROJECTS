@@ -8,8 +8,6 @@ codeunit 90000 "JobPendingApprovalNotification"
         CompanyRec: Record Company;
         PendingApprovalsByUser: JsonArray;
         CompanyArray: JsonArray;
-        JsonText: Text;
-
     begin
         CompanyRec.SetFilter(Name, '<>%1', 'CENTRAL');
 
@@ -33,7 +31,10 @@ codeunit 90000 "JobPendingApprovalNotification"
                                 if not UserExistsInArray(PendingApprovalsByUser, LastUser) then begin
                                     PendingApprovalsByUser.Add(GetUserObject(LastUser, CompanyArray));
                                 end else begin
-                                    AddCompanyToUser(PendingApprovalsByUser, LastUser, CompanyRec.Name, PendingCount);
+                                    AddCompanyToUser(PendingApprovalsByUser,
+                                                    LastUser,
+                                                    CompanyRec.Name,
+                                                    PendingCount);
                                 end;
                             end;
 
@@ -41,13 +42,27 @@ codeunit 90000 "JobPendingApprovalNotification"
                             PendingCount := 0;
                         end;
 
-                        PendingCount += 1;
+                        if ExistsRecord(ApprovalEntry."Table ID",
+                                        CompanyRec.Name,
+                                        ApprovalEntry."Record ID to Approve") then begin
+                            PendingCount += 1;
+                        end;
                     until ApprovalEntry.Next() = 0;
                 end;
             until CompanyRec.Next() = 0;
 
             SendPendingApprovals(PendingApprovalsByUser);
         end;
+    end;
+
+    procedure ExistsRecord(TableNo: Integer; CompanyName: Text; DocNo: RecordId): Boolean
+    var
+        RecRef: RecordRef;
+    begin
+        RecRef.Open(TableNo);
+        RecRef.ChangeCompany(CompanyName);
+
+        exit(RecRef.get(DocNo));
     end;
 
     local procedure SendPendingApprovals(PendingApprovals: JsonArray)
@@ -148,7 +163,7 @@ codeunit 90000 "JobPendingApprovalNotification"
         TokenUserValue: JsonToken;
         UserObj: JsonObject;
         TokenCompanies: JsonToken;
-        CompanyArr: JsonArray;
+        CompanyArray: JsonArray;
         ExistingUser: Text;
     begin
         for index := 0 to ApprovalPendingByUser.Count() - 1 do begin
@@ -159,9 +174,9 @@ codeunit 90000 "JobPendingApprovalNotification"
 
             if ExistingUser = UserName then begin
                 UserObj.Get('companies', TokenCompanies);
-                CompanyArr := TokenCompanies.AsArray();
-                CompanyArr.Add(GetCompanyObject(CompanyName, PendingCount));
-                UserObj.Replace('companies', CompanyArr);
+                CompanyArray := TokenCompanies.AsArray();
+                CompanyArray.Add(GetCompanyObject(CompanyName, PendingCount));
+                UserObj.Replace('companies', CompanyArray);
                 exit;
             end;
         end;
