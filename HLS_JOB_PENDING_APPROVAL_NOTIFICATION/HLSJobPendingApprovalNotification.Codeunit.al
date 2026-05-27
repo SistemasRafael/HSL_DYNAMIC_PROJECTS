@@ -1,4 +1,4 @@
-codeunit 90000 "JobPendingApprovalNotification"
+codeunit 90001 "HLS_JobPendingApproval"
 {
     trigger OnRun()
     var
