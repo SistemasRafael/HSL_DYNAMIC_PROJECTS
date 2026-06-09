@@ -1,4 +1,4 @@
-pageextension 90008 "HLSPriorityStatusListPageExt" extends "EOS Purchase Request List"
+pageextension 90005 "HLSPriorityStatusListPageExt" extends "EOS Purchase Request List"
 {
     layout
     {

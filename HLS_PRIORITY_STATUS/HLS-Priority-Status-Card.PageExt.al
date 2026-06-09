@@ -1,13 +1,14 @@
-pageextension 90007 "HLSPriorityStatusCardPageExt" extends "EOS Purchase Request"
+pageextension 90006 "HLSPriorityStatusCardPageExt" extends "EOS Purchase Request"
 {
     layout
     {
-        addafter("Approved Date")
+        addafter("No.")
         {
-            field("Code"; Rec."Code")
+            field("Priority Status"; Rec."Code")
             {
                 ApplicationArea = All;
                 Caption = 'Priority Status';
+                ShowMandatory = true;
             }
         }
     }
